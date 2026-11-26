@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><title>Blokowo Studio</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#1e1e1e;color:#ddd;font:12px/1.4 'Segoe UI',sans-serif}
+[hidden]{display:none!important}
+#app{display:grid;height:100vh;grid-template-columns:210px minmax(0,1fr) 270px;grid-template-rows:auto minmax(0,1fr)}
+button,input,select,textarea{font:inherit;color:#ddd;background:#3a3a3a;border:1px solid #555;border-radius:3px;padding:2px 6px}
+button{cursor:pointer}button:hover{background:#4a4a4a}
+input[type=checkbox]{padding:0}input[type=color]{padding:0;height:22px;width:44px}
+#ribbon{grid-column:1/4;display:flex;gap:0;background:#2b2b2b;border-bottom:1px solid #111;padding:4px 6px;overflow-x:auto}
+.grp{padding:0 10px;border-right:1px solid #444;display:flex;flex-direction:column;gap:3px;white-space:nowrap}
+.grp b{font-size:10px;color:#8ab4f8;text-transform:uppercase;letter-spacing:.5px}
+.grp div{display:flex;gap:4px;align-items:center}
+#left,#right>div{background:#252525;overflow:auto;border-right:1px solid #111}
+#left{padding-bottom:8px}
+h4{margin:0;padding:5px 8px;background:#333;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#bbb}
+.sec{padding:6px 8px 2px;color:#8ab4f8;font-size:11px;display:flex;justify-content:space-between;align-items:center}
+#tpl,#th{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px}
+#tpl button{flex:1 0 40%}
+.th{width:84px;border:1px solid #444;border-radius:3px;text-align:center;cursor:pointer;overflow:hidden;background:#1a1a1a}
+.th:hover{border-color:#8ab4f8}.th img,.th i{display:block;width:100%;height:56px;object-fit:cover;font-style:normal;line-height:56px;font-size:22px}
+.th span{display:block;font-size:10px;padding:1px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#left select{margin:2px 8px;width:calc(100% - 16px)}#left .row{padding:2px 8px;display:flex;gap:4px}
+#center{display:flex;flex-direction:column;min-width:0;min-height:0}
+#tabs{background:#2b2b2b;display:flex;gap:1px}
+.tab{border:0;border-radius:0;background:#333;padding:4px 14px}.tab.on{background:#1e1e1e;color:#8ab4f8}
+#vp{flex:1;position:relative;min-height:0;min-width:0;overflow:hidden;background:#87ceeb}
+#vp canvas{position:absolute;inset:0}
+#rt{position:absolute;inset:0;background:#1e1e1e;display:flex;flex-direction:column;z-index:2}
+#rt .hint{padding:6px 10px;color:#999;background:#252525}
+#rules{flex:1;resize:none;border:0;border-radius:0;background:#1e1e1e;font:13px/1.5 Consolas,monospace;padding:10px;color:#dcdcaa}
+#outwrap{height:150px;background:#1b1b1b;display:flex;flex-direction:column;border-top:1px solid #111}
+#outwrap h4{display:flex;justify-content:space-between;align-items:center}
+#out{flex:1;overflow:auto;padding:4px 8px;font:12px Consolas,monospace;color:#b5cea8}
+#right{display:flex;flex-direction:column;min-height:0;border-left:1px solid #111}
+#exp{flex:1;min-height:0}#props{flex:none;height:300px;border-top:1px solid #111}
+.it{padding:1px 8px;cursor:default;white-space:nowrap}.it:hover{background:#333}.l1{color:#999}.l2{padding-left:26px;cursor:pointer}.sel{background:#264f78!important;color:#fff}
+#props .f{display:flex;align-items:center;gap:4px;padding:2px 8px}#props .f label{width:62px;color:#aaa}
+#props input[type=number]{width:60px}#f_id{width:140px}
+body.pv #left,body.pv #right{opacity:.45;pointer-events:none}
+#spv{background:#2d6a2d}body.pv #spv{background:#8a2d2d}
+#ribbon button.on{background:#264f78;border-color:#8ab4f8}
+#bt{position:absolute;inset:0;background:#1e1e1e;display:flex;z-index:2}
+#pal{width:215px;flex:none;background:#252525;overflow:auto;padding:6px;border-right:1px solid #111}
+#pal .cat{color:#8ab4f8;font-size:11px;text-transform:uppercase;margin:8px 2px 3px}
+#wsw{flex:1;display:flex;flex-direction:column;min-width:0}
+#wsw .hint{padding:6px 10px;color:#999;background:#252525}
+#ws{flex:1;overflow:auto;padding:16px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:24px;background:#1e1e1e}
+.script{min-width:280px;align-self:flex-start}
+.b{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:6px 10px;color:#fff;font-weight:600;border-bottom:2px solid rgba(0,0,0,.25);border-radius:4px;margin-bottom:1px}.b>*{white-space:nowrap}
+.b.hat{border-radius:16px 16px 4px 4px;padding-top:10px}
+#pal .b{margin:3px 0;cursor:grab}
+.vr{background:#ff8c1a}.cn{background:#cf8b17}.tm{background:#3aa9cf}.ev{background:#ffab19}.mv{background:#4c97ff}.lk{background:#9966ff}.pl{background:#ff6680}.sy{background:#59c059}.raw{background:#777}
+.b select,.b input[type=number],.b input[type=text]{background:#fff;color:#333;border:0;border-radius:10px;padding:1px 6px;font-weight:600}
+.b input[type=number]{width:56px}.b input[type=text]{width:120px}
+.b label{font-weight:400;display:flex;align-items:center;gap:3px}
+.grip{cursor:grab;opacity:.7}.hat .grip{display:none}
+.b .x{margin-left:auto;cursor:pointer;opacity:.7;padding-left:8px}.b .x:hover{opacity:1}
+.b code{font-weight:400;font-size:11px}
+.slot{height:14px;border-radius:3px}.slot.on{background:#ffffff44}
+.dt{box-shadow:0 -3px 0 #fff}.db{box-shadow:0 3px 0 #fff}
+.ex{display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.2);border-radius:10px;padding:1px 4px;font-weight:400}
+.ex select.k{font-size:10px;padding:0 2px;background:#ffffffcc}
+.cbox{margin-left:16px;padding:2px 0 2px 6px;border-left:6px solid #cf8b17;min-height:18px}
+.clabel{margin-left:16px;padding:2px 10px;color:#fff;font-weight:600;font-size:11px;background:#cf8b17;border-radius:0 0 4px 4px;display:inline-block}
+#pvhud{position:absolute;right:8px;top:8px;background:#000a;color:#fff;padding:6px 10px;white-space:pre;z-index:1;border-radius:4px;font:13px Consolas,monospace}
+</style></head><body>
+<div id="app">
+ <div id="ribbon">
+  <div class="grp"><b>Plik</b><div><button id="snew">Nowy</button><button id="sopenb">Otwórz</button><button id="ssave">Zapisz</button></div></div>
+  <div class="grp"><b>Część</b><div><button id="sadd">+ Blok</button><button id="sdup" title="Ctrl+D">Duplikuj</button><button id="sdel" title="Delete">Usuń</button><button id="sspawn">Spawn tu</button></div></div>
+  <div class="grp"><b>Narzędzia</b><div><button id="tmove" class="on" title="klawisz 1">Przesuń</button><button id="tscale" title="klawisz 2">Skaluj</button></div></div>
+  <div class="grp"><b>Widok</b><div>siatka <select id="grid"><option value="0.1">0.1</option><option value="0.5" selected>0.5</option><option value="1">1</option><option value="0">wył.</option></select><label><input id="sgr" type="checkbox" checked> podłoga</label></div></div>
+  <div class="grp"><b>Test</b><div><button id="spv">▶ Podgląd</button></div></div>
+  <div class="grp"><b>Gra</b><div><input id="sn" value="moja_gra" size="14"></div></div>
+  <div class="grp"><b>Serwer</b><div>adres <input id="addr" value="localhost:3000" size="16"> klucz <input id="key" type="password" size="8"><button id="spub">Publikuj</button></div></div>
+  <input id="sopen" type="file" accept=".json,application/json" hidden>
+ </div>
+ <div id="left"><h4>Assety</h4>
+  <div class="sec">Części</div><div id="tpl"></div>
+  <div class="sec">Tekstury <button id="upl">+ Dodaj</button></div><input id="sfile" type="file" accept="image/*" hidden><div id="th"></div>
+  <div class="sec">Gry na serwerze</div><select id="sl"></select><div class="row"><button id="slist">Lista</button><button id="sload">Wczytaj</button></div>
+ </div>
+ <div id="center">
+  <div id="tabs"><button class="tab on" data-t="vp">Widok 3D</button><button class="tab" data-t="bl">Bloki (reguły)</button><button class="tab" data-t="js">Reguły JSON</button></div>
+  <div id="vp"><div id="pvhud" hidden></div><div id="bt" hidden><div id="pal"></div><div id="wsw"><div class="hint">Przeciągaj bloki z palety (lub klikaj) · upuść blok na skrypt, żeby go wstawić · ✕ usuwa · przeciągnij blok z powrotem na paletę, aby usunąć · w bloku „powiedz” działają wstawki {zmienna}, {@wynik}, {#timer}</div><div id="ws"></div></div></div><div id="rt" hidden><div class="hint">JSON · on: start | touch (opc. once) · akcje: move{part,axis,to,speed,loop} · hide · show · kill · tp[x,y,z] · say</div><textarea id="rules" spellcheck="false"></textarea></div></div>
+  <div id="outwrap"><h4>Output <button id="clr">Wyczyść</button></h4><div id="out"></div></div>
+ </div>
+ <div id="right">
+  <div id="exp"><h4>Hierarchia</h4><div id="tree"></div></div>
+  <div id="props"><h4>Właściwości</h4>
+   <div class="f"><label>Nazwa</label><input id="f_id"></div>
+   <div class="f"><label>Pozycja</label><input id="f_p0" type="number" step=".5"><input id="f_p1" type="number" step=".5"><input id="f_p2" type="number" step=".5"></div>
+   <div class="f"><label>Rozmiar</label><input id="f_s0" type="number" step=".5" min=".1"><input id="f_s1" type="number" step=".5" min=".1"><input id="f_s2" type="number" step=".5" min=".1"></div>
+   <div class="f"><label>Kolor</label><input id="f_c" type="color"></div>
+   <div class="f"><label>Tekstura</label><select id="f_t"></select></div>
+   <div class="f"><label>Zakotwiczona</label><input id="f_a" type="checkbox"> <small>(odznacz = fizyka)</small></div>
+   <div class="f"><label>Koliduje</label><input id="f_k" type="checkbox"></div>
+  </div>
+ </div>
+</div>
+<datalist id="names"></datalist>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $ = id => document.getElementById(id), FILE = /^[\w-]{1,40}\.(png|jpe?g|gif|webp)$/i, PH = 3.4;
+const vp = $('vp'), ren = new THREE.WebGLRenderer({ antialias: true }); vp.prepend(ren.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x87ceeb);
+const cam = new THREE.PerspectiveCamera(70, 1, 0.1, 800);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x556655, 1));
+const sun = new THREE.DirectionalLight(0xffffff, 0.6); sun.position.set(30, 60, 20); scene.add(sun);
+function resize() { const w = vp.clientWidth, h = vp.clientHeight; if (!w || !h) return; ren.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(vp); resize();
+const TL = new THREE.TextureLoader(); TL.setCrossOrigin('anonymous');
+let world = new THREE.Group(), spawnM; scene.add(world);
+const T = new THREE.Vector3(0, 2, 0), ray = new THREE.Raycaster(), assets = new Set(), local = new Map(), keys = {};
+let HTTP = '', sock, sockUrl = '', key = '', mode = 'studio', S, sel = null, dist = 25, yaw = 0.5, pitch = 0.6, drag = false, grid = 0.5, tool = 'move', lastGet = '';
+
+function note(t) { const o = $('out'), d = document.createElement('div'); d.textContent = '[' + new Date().toTimeString().slice(0, 8) + '] ' + t; o.appendChild(d); while (o.children.length > 200) o.firstChild.remove(); o.scrollTop = o.scrollHeight; }
+const show = m => { mode = m; document.body.classList.toggle('pv', m === 'pv'); $('spv').textContent = m === 'pv' ? '■ Zatrzymaj' : '▶ Podgląd'; };
+function tab(t) { $('rt').hidden = t !== 'js'; $('bt').hidden = t !== 'bl'; if (t === 'bl') renderBlocks(); document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); }
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => tab(b.dataset.t));
+$('clr').onclick = () => $('out').innerHTML = '';
+
+// ---------- świat ----------
+const texCache = new Map();
+function setTex(mat, tex) {
+  if (!FILE.test(tex || '')) mat.map = null;
+  else { const u = local.get(tex) || HTTP + '/resources/' + tex; if (!texCache.has(u)) texCache.set(u, TL.load(u)); mat.map = texCache.get(u); }
+  mat.needsUpdate = true;
+}
+function mkPart(d) {
+  const mat = new THREE.MeshLambertMaterial({ color: /^#[0-9a-f]{6}$/i.test(d.color) ? d.color : '#888888' });
+  setTex(mat, d.tex);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
+  m.scale.set(...d.size); m.position.set(...d.pos); world.add(m);
+  const p = { d, mesh: m, tex: d.tex }; m.userData.p = p; return p;
+}
+function build(g) {
+  scene.remove(world); world = new THREE.Group(); scene.add(world);
+  if (g.ground) { const m = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshLambertMaterial({ color: g.ground })); m.rotation.x = -Math.PI / 2; world.add(m); }
+  spawnM = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.12, 20), new THREE.MeshBasicMaterial({ color: 0x33ff66 }));
+  spawnM.position.set(...(g.spawn || [0, 3, 0])); world.add(spawnM);
+  g.parts.forEach(mkPart);
+}
+function orbit(x, y, z, d) {
+  cam.position.set(x + Math.sin(yaw) * Math.cos(pitch) * d, y + Math.sin(pitch) * d, z + Math.cos(yaw) * Math.cos(pitch) * d);
+  cam.lookAt(x, y, z);
+}
+
+// ---------- serwer: tylko przy publikowaniu / wczytywaniu z serwera ----------
+function conn(then) {
+  let u; try { const a = $('addr').value.trim(); u = new URL(/^https?:/.test(a) ? a : 'http://' + a); } catch { return note('Zły adres serwera'); }
+  key = $('key').value;
+  if (sock && sock.readyState === 1 && sockUrl === u.origin) return then();
+  if (sock) sock.close();
+  HTTP = sockUrl = u.origin; note('Łączenie z ' + HTTP + '…');
+  const w = sock = new WebSocket(HTTP.replace('http', 'ws'));
+  w.onopen = then; w.onmessage = e => onMsg(JSON.parse(e.data));
+  w.onclose = () => { if (sock === w) sock = null; }; w.onerror = () => note('Nie można połączyć z serwerem');
+}
+const send = o => sock && sock.readyState === 1 && sock.send(JSON.stringify(o));
+function onMsg(m) {
+  if (m.t === 'games') { $('sl').innerHTML = ''; m.list.forEach(n => $('sl').add(new Option(n, n))); note('Gier na serwerze: ' + m.list.length); }
+  else if (m.t === 'game') { stLoad(m.game); $('sn').value = lastGet; note('Wczytano „' + lastGet + '” z serwera'); }
+  else if (m.t === 'published') note('Opublikowano „' + m.name + '” w games/ – graj klientem Blokowo');
+  else if (m.t === 'error') note('Błąd serwera: ' + m.msg);
+}
+
+// ---------- edytor ----------
+const rnd = () => '#' + (Math.random() * 0xffffff | 0).toString(16).padStart(6, '0');
+const STARTER = {"spawn":[-52,8.5,72],"parts":[{"id":"part2","pos":[-43.6,11.9,81.25],"size":[5.7,8.8,0.6],"color":"#865e3c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part1","pos":[-53.887,11.9,81.249],"size":[5.7,8.8,0.6],"color":"#865e3c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part3","pos":[-48.753,15.033,81.251],"size":[4.63,2.535,0.6],"color":"#865e3c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part4","pos":[-48.741,11.9,67.666],"size":[16,8.8,0.6],"color":"#865e3c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part5","pos":[-40.942,11.89,74.45],"size":[0.41,8.781,13],"color":"#865e3c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part6","pos":[-56.533,11.89,74.456],"size":[0.41,8.781,13],"color":"#865e3c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part7","pos":[-49.148,16.905,74.337],"size":[17.599,1.254,15.238],"color":"#500808","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part8","pos":[-48.559,7.55,74.724],"size":[15.982,0.1,13.645],"color":"#2d251c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part9","pos":[-55.346,7.839,69.129],"size":[0.408,0.679,0.456],"color":"#3d3846","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part10","pos":[-55.322,8.228,69.121],"size":[1.051,0.298,1.124],"color":"#500808","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part11","pos":[-55.32,8.899,68.61],"size":[1.051,1.641,0.1],"color":"#500808","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part12","pos":[-56.431,11.821,92.1],"size":[1.63,8.702,1.857],"color":"#63452c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part13","pos":[-56.541,18.563,92.021],"size":[5.808,4.982,6.533],"color":"#8ff0a4","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part14","pos":[-28.62,11.821,104.957],"size":[1.63,8.702,1.857],"color":"#ffffff","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part15","pos":[-28.6,18.563,104.933],"size":[5.808,4.982,6.533],"color":"#26a269","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part16","pos":[-36.314,7.503,94.439],"size":[79.275,0.1,87.05],"color":"#124506","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part17","pos":[-58.738,11.821,122.536],"size":[1.63,8.702,1.857],"color":"#ffffff","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part18","pos":[-59.278,18.563,122.49],"size":[5.808,4.982,6.533],"color":"#26a269","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part19","pos":[-36.517,11.821,132.209],"size":[1.63,8.702,1.857],"color":"#63452c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part20","pos":[-36.592,18.563,131.181],"size":[5.808,4.982,6.533],"color":"#8ff0a4","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part21","pos":[-46.625,11.205,69.61],"size":[5.77,4.074,0.1],"color":"#241f31","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part22","pos":[-46.609,11.215,69.655],"size":[5.473,3.751,0.1],"color":"#000000","anchored":true,"collide":true},{"id":"part23","pos":[-46.736,9.046,69.431],"size":[0.408,2.676,0.456],"color":"#3d3846","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part24","pos":[-46.676,8.136,69.841],"size":[4.85,1.272,2.956],"color":"#2d251c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part25","pos":[-49.219,18.011,74.337],"size":[15.457,1.254,15.23],"color":"#500808","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part26","pos":[-49.154,18.418,74.335],"size":[14.097,2.069,15.23],"color":"#500808","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part27","pos":[-49.057,19.377,74.344],"size":[11.507,1.815,15.23],"color":"#500808","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part28","pos":[-36.303,10.964,51.964],"size":[79.283,7.022,0.1],"color":"#124506","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part29","pos":[-36.282,10.964,137.789],"size":[79.283,7.022,0.1],"color":"#124506","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part30","pos":[3.245,10.964,94.776],"size":[0.1,7.022,88.126],"color":"#124506","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part31","pos":[-75.654,11.093,95.776],"size":[0.1,7.022,88.126],"color":"#124506","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part32","pos":[-25.29,8.029,69.514],"size":[4.713,1.058,1.226],"color":"#2d251c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part33","pos":[-25.301,8.598,68.957],"size":[4.713,2.196,0.1],"color":"#2d251c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part34","pos":[-15.941,8.029,69.515],"size":[4.713,1.058,1.226],"color":"#2d251c","anchored":true,"collide":true,"tex":"ceramic.png"},{"id":"part35","pos":[-15.935,8.598,68.959],"size":[4.713,2.196,0.1],"color":"#2d251c","anchored":true,"collide":true,"tex":"ceramic.png"}],"rules":[{"on":"touch","part":"lava1","do":[{"kill":true},{"say":"Lawa!"}]}],"_assets":{"ceramic.png":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAZ1JREFUOI19k8FqE1EYhb+ZXBjMzFyy0oUidBG1EAilthHB6Ka0r+C7+A4+hgtfQJQuUjFgy9iWBAINbgJxkdUwkwmZZCbjQu9NbjL0X93/nvsf/nMO1/r04X3xrHnMfXX9/RuerFFvHhn3vZ8dxGI+Lx2ajEe4vsSVNQ7enBjYbBpTrHIsLOxGq82wHzAIusYj15dYdkX3SRQym8YAFKucJI5otNoIgCxNNagJZM3okzjC9aXGFC4A9g9f76znyhr9ywuE4/Ci2eLh46elUu3tC7UewHw2I0tTjQ2CLsN+YEgSqrHsClXPN9Z7+e5sx7zqliSxrW94e4VwHB492dNSVB2+PdVnJclWjXo4jUKyNDWkTMYjkihcGxqFTMajtYmbwPODV1Q9H1gnsR2pZVf0xoaJSRxRrHJD9yDo8mf0W5MC2isAcfPjHNeT1JtHpVEp4zbjBQg6XyhWOcL1JPnO2DoZZVwShf/M/k/gPKiSZUus4PPHomTe+Av3lfbgrndF/7Kjgc1kyshVKpogXy5ZzNPSgV8XXw3yzVT+Ar4oxW5JKVADAAAAAElFTkSuQmCC"}};
+const stBlank = () => ({ spawn: [0, 3, 0], ground: '#4caf50', parts: [{ id: 'floor', pos: [0, 0.5, 0], size: [10, 1, 10], color: '#888888', anchored: true, collide: true }], rules: [] });
+function stDefault() { // domyślny projekt po otwarciu Studia (z teksturami wbudowanymi w plik)
+  const { _assets, ...g } = JSON.parse(JSON.stringify(STARTER));
+  Object.entries(_assets || {}).forEach(([n, d]) => FILE.test(n) && local.set(n, d));
+  return g;
+}
+function stLoad(g) {
+  S = { spawn: [0, 3, 0], parts: [], rules: [], ...g }; if (!Array.isArray(S.parts)) S.parts = []; if (!Array.isArray(S.rules)) S.rules = [];
+  S.parts.forEach(p => p.tex && assets.add(p.tex)); $('sgr').checked = !!S.ground;
+  build(S); sel = null; $('rules').value = JSON.stringify(S.rules, null, 1); fillAssets(); fill(); tree();
+}
+const pOf = d => world.children.map(m => m.userData.p).find(p => p && p.d === d);
+function tree() {
+  const t = $('tree'); t.innerHTML = '';
+  const row = (txt, cls, fn) => { const d = document.createElement('div'); d.className = 'it ' + cls; d.textContent = txt; if (fn) d.onclick = fn; t.appendChild(d); };
+  row('🎮 ' + ($('sn').value || 'Gra'), ''); row('▾ Workspace', 'l1');
+  S.parts.forEach(d => row('▣ ' + d.id + (d.anchored === false ? '  ⇩' : ''), 'l2' + (sel && sel.d === d ? ' sel' : ''), () => selPart(pOf(d))));
+  row('▸ Reguły (' + S.rules.length + ')', 'l1', () => tab('bl'));
+}
+function fillAssets() {
+  const v = $('f_t').value; $('f_t').innerHTML = ''; $('f_t').add(new Option('(brak)', '')); $('th').innerHTML = '';
+  const tile = (inner, name, fn) => { const d = document.createElement('div'); d.className = 'th'; d.title = name; d.appendChild(inner); const s = document.createElement('span'); s.textContent = name; d.appendChild(s); d.onclick = fn; $('th').appendChild(d); };
+  const none = document.createElement('i'); none.textContent = '∅'; tile(none, '(brak)', () => applyTex(''));
+  assets.forEach(a => { $('f_t').add(new Option(a, a)); const im = document.createElement('img'); im.src = local.get(a) || HTTP + '/resources/' + a; tile(im, a, () => applyTex(a)); });
+  $('f_t').value = v;
+}
+function applyTex(a) { if (!sel) return note('Zaznacz część, aby nałożyć teksturę'); $('f_t').value = a; apply(); }
+function selPart(p) {
+  if (sel) sel.mesh.material.emissive.set(0); sel = p;
+  if (p) { p.mesh.material.emissive.set(0x444444); if (p.d.tex) assets.add(p.d.tex); fillAssets(); }
+  fill(); tree();
+}
+function fill() {
+  const d = sel && sel.d; $('props').style.opacity = d ? 1 : 0.45; if (!d) return;
+  $('f_id').value = d.id;
+  for (let i = 0; i < 3; i++) { $('f_p' + i).value = d.pos[i]; $('f_s' + i).value = d.size[i]; }
+  $('f_c').value = d.color; $('f_a').checked = d.anchored !== false; $('f_k').checked = d.collide !== false; $('f_t').value = d.tex || '';
+}
+function apply() {
+  const d = sel && sel.d; if (!d) return;
+  const old = d.id, nid = $('f_id').value.replace(/[^\w-]/g, '').slice(0, 32); if (nid && !S.parts.some(p => p !== d && p.id === nid)) d.id = nid; if (d.id !== old) renameRefs(old, d.id);
+  for (let i = 0; i < 3; i++) { d.pos[i] = +$('f_p' + i).value || 0; d.size[i] = Math.max(0.1, +$('f_s' + i).value || 1); }
+  d.color = $('f_c').value; d.anchored = $('f_a').checked; d.collide = $('f_k').checked; d.tex = $('f_t').value || undefined;
+  const m = sel.mesh; m.position.set(...d.pos); m.scale.set(...d.size); m.material.color.set(d.color);
+  if (sel.tex !== d.tex) { setTex(m.material, d.tex); sel.tex = d.tex; }
+  tree();
+}
+$('props').addEventListener('input', apply); $('props').addEventListener('change', apply);
+$('rules').addEventListener('input', () => { try { S.rules = JSON.parse($('rules').value || '[]'); tree(); } catch { } });
+
+const newId = b => { let n = 1, id; do { id = b + n++; } while (S.parts.some(p => p.id === id)); return id; };
+const TPL = {
+  'Blok': () => ({}),
+  'Lawa': () => ({ base: 'lava', size: [6, 0.4, 6], color: '#f44336', rule: id => ({ on: 'touch', part: id, do: [{ kill: true }, { say: 'Lawa!' }] }) }),
+  'Przycisk': () => ({ base: 'btn', size: [1.5, 0.3, 1.5], color: '#ffeb3b', rule: id => ({ on: 'touch', part: id, do: [{ say: 'Przycisk ' + id }] }) }),
+  'Winda': () => ({ base: 'lift', color: '#2196f3', rule: (id, pos) => ({ on: 'start', do: [{ move: { part: id, axis: 'y', to: pos[1] + 8, speed: 2, loop: true } }] }) }),
+  'Fizyka': () => ({ base: 'box', size: [2, 2, 2], color: '#ff9800', anchored: false })
+};
+function addPart(o) {
+  const id = newId(o.base || 'part'), pos = [Math.round(T.x), Math.round(T.y) || 1, Math.round(T.z)];
+  const d = { id, pos, size: o.size || [4, 1, 4], color: o.color || rnd(), anchored: o.anchored !== false, collide: true };
+  S.parts.push(d);
+  if (o.rule) { try { S.rules = JSON.parse($('rules').value || '[]'); S.rules.push(o.rule(id, pos)); $('rules').value = JSON.stringify(S.rules, null, 1); } catch { note('Reguła nie dodana – popraw JSON w zakładce Reguły'); } }
+  selPart(mkPart(d)); note('Dodano ' + id);
+}
+Object.keys(TPL).forEach(n => { const b = document.createElement('button'); b.textContent = n; b.onclick = () => addPart(TPL[n]()); $('tpl').appendChild(b); });
+function del() { if (!sel) return; world.remove(sel.mesh); S.parts.splice(S.parts.indexOf(sel.d), 1); note('Usunięto ' + sel.d.id); sel = null; fill(); tree(); }
+function dup() {
+  if (!sel) return; const s = sel.d;
+  const d = { ...s, id: newId(s.id.replace(/\d+$/, '') || 'part'), pos: [...s.pos], size: [...s.size] };
+  S.parts.push(d); selPart(mkPart(d));
+}
+function studioCam(dt) {
+  const f = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0), s = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0), v = (keys.KeyE ? 1 : 0) - (keys.KeyQ ? 1 : 0), k = 15 * dt;
+  T.x += (-Math.sin(yaw) * f + Math.cos(yaw) * s) * k; T.z += (-Math.cos(yaw) * f - Math.sin(yaw) * s) * k; T.y += v * k;
+  orbit(T.x, T.y, T.z, dist);
+  if (sel) {
+    if (tool === 'move') { gz.visible = true; gz.position.copy(sel.mesh.position); gz.scale.setScalar(cam.position.distanceTo(gz.position) * 0.06); }
+    else {
+      sg.visible = true; const sc = cam.position.distanceTo(sel.mesh.position) * 0.035;
+      SH.forEach(m => { const ax = m.userData.sax; m.position.copy(sel.mesh.position); m.position.setComponent(ax, sel.mesh.position.getComponent(ax) + m.userData.sgn * sel.d.size[ax] / 2); m.scale.setScalar(sc); });
+    }
+  }
+}
+
+// ---------- przesuwanie części myszą (uchwyty osi + płaszczyzna) ----------
+const gz = new THREE.Group(), pl = new THREE.Plane(new THREE.Vector3(0, 1, 0)), pt = new THREE.Vector3();
+let dg = null; gz.visible = false; scene.add(gz);
+const sg = new THREE.Group(), SH = []; sg.visible = false; scene.add(sg); // uchwyty skalowania: po jednym na ścianę
+[[0, 1], [0, -1], [1, 1], [1, -1], [2, 1], [2, -1]].forEach(([ax, sgn]) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: [0xff3333, 0x33ff33, 0x3366ff][ax], depthTest: false }));
+  m.renderOrder = 999; m.userData = { sax: ax, sgn }; sg.add(m); SH.push(m);
+});
+[['x', 0xff3333], ['y', 0x33ff33], ['z', 0x3366ff]].forEach(([ax, c]) => {
+  const mat = new THREE.MeshBasicMaterial({ color: c, depthTest: false }), h = new THREE.Group();
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6), mat); shaft.position.y = 0.8;
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.5), mat); tip.position.y = 1.85;
+  const fat = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.1), new THREE.MeshBasicMaterial({ visible: false })); fat.position.y = 1.05;
+  shaft.renderOrder = tip.renderOrder = 999; h.add(shaft, tip, fat);
+  if (ax === 'x') h.rotation.z = -Math.PI / 2; if (ax === 'z') h.rotation.x = Math.PI / 2;
+  h.userData.axis = 'xyz'.indexOf(ax); gz.add(h);
+});
+function setRay(e) { const r = ren.domElement.getBoundingClientRect(); ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -((e.clientY - r.top) / r.height) * 2 + 1 }, cam); }
+const snap = v => grid ? +(Math.round(v / grid) * grid).toFixed(3) : +v.toFixed(3);
+function movePart(i, v) { sel.d.pos[i] = v; sel.mesh.position.setComponent(i, v); fill(); }
+function axT(o, ax) {
+  const ro = ray.ray.origin, rd = ray.ray.direction, w = [o[0] - ro.x, o[1] - ro.y, o[2] - ro.z];
+  const b = rd.getComponent(ax), e = rd.x * w[0] + rd.y * w[1] + rd.z * w[2], den = 1 - b * b;
+  return den < 1e-4 ? null : (b * e - w[ax]) / den;
+}
+function dragStart(e) { // true = przechwycono
+  setRay(e);
+  if (sel && tool === 'move') {
+    const g = ray.intersectObjects(gz.children, true)[0];
+    if (g) {
+      let o = g.object; while (o && !('axis' in o.userData)) o = o.parent;
+      const t0 = axT(sel.d.pos, o.userData.axis);
+      if (t0 !== null) { dg = { axis: o.userData.axis, start: [...sel.d.pos], t0 }; return true; }
+    }
+  }
+  if (sel && tool === 'scale') {
+    const g = ray.intersectObjects(SH)[0];
+    if (g) {
+      const { sax, sgn } = g.object.userData, t0 = axT(sel.d.pos, sax);
+      if (t0 !== null) { dg = { scale: true, axis: sax, sgn, start: [...sel.d.pos], size0: [...sel.d.size], t0 }; return true; }
+    }
+  }
+  const h = ray.intersectObjects(world.children).find(i => i.object.userData.p);
+  if (!h) return false;
+  const p = h.object.userData.p; if (p !== sel) selPart(p);
+  if (tool !== 'move') return true;
+  pl.constant = -p.d.pos[1];
+  if (!ray.ray.intersectPlane(pl, pt)) return false;
+  dg = { axis: -1, off: [pt.x - p.d.pos[0], pt.z - p.d.pos[2]] }; return true;
+}
+function dragMove(e) {
+  if (!sel) return; setRay(e);
+  if (dg.scale) { // przeciągnięcie ściany: przeciwna ściana zostaje w miejscu
+    const t = axT(dg.start, dg.axis); if (t === null) return;
+    const ax = dg.axis, d = sel.d, ns = Math.max(0.1, snap(dg.size0[ax] + dg.sgn * (t - dg.t0)));
+    d.size[ax] = ns; d.pos[ax] = +(dg.start[ax] + dg.sgn * (ns - dg.size0[ax]) / 2).toFixed(3);
+    sel.mesh.scale.setComponent(ax, ns); sel.mesh.position.setComponent(ax, d.pos[ax]); fill();
+  }
+  else if (dg.axis >= 0) { const t = axT(dg.start, dg.axis); if (t !== null) movePart(dg.axis, snap(dg.start[dg.axis] + t - dg.t0)); }
+  else if (ray.ray.intersectPlane(pl, pt)) { movePart(0, snap(pt.x - dg.off[0])); movePart(2, snap(pt.z - dg.off[1])); }
+}
+
+// ENGINE-BEGIN (silnik reguł: wyrażenia, zmienne, wyniki, timery – ten sam kod w server.js i w Studio)
+function Engine(h) {
+  const E = { vars: Object.create(null), timers: new Map(), acc: [] };
+  const nm = n => typeof n === 'string' && /^[\w-]{1,32}$/.test(n) ? n : null;
+  const left = (n, pl) => { const t = E.timers.get(n + ':' + (pl ? pl.id : '')) || E.timers.get(n + ':'); return t ? Math.max(0, t.left) : 0; };
+  const ev = (x, pl, d = 0) => { // wartość: liczba | {var} | {score} | {timer} | {rand:[min,max]} | {op,a,b}
+    if (typeof x === 'number') return Number.isFinite(x) ? x : 0;
+    if (!x || typeof x !== 'object' || d > 12) return 0;
+    if (x.var !== undefined) return +E.vars[x.var] || 0;
+    if (x.score !== undefined) return pl ? +pl.sc[x.score] || 0 : 0;
+    if (x.timer !== undefined) return left(String(x.timer), pl);
+    if (Array.isArray(x.rand)) {
+      let a = ev(x.rand[0], pl, d + 1), b = ev(x.rand[1], pl, d + 1); if (a > b) [a, b] = [b, a];
+      return Number.isInteger(a) && Number.isInteger(b) ? a + Math.floor(Math.random() * (b - a + 1)) : a + Math.random() * (b - a);
+    }
+    if (x.op) {
+      const a = ev(x.a, pl, d + 1), b = ev(x.b, pl, d + 1);
+      return x.op === '+' ? a + b : x.op === '-' ? a - b : x.op === '*' ? a * b : x.op === '/' ? (b ? a / b : 0) : x.op === '%' ? (b ? a % b : 0) : 0;
+    }
+    return 0;
+  };
+  const test = (c, pl) => {
+    if (!c || typeof c !== 'object') return false;
+    const a = ev(c.a, pl), b = ev(c.b, pl);
+    return c.cmp === '<' ? a < b : c.cmp === '>' ? a > b : c.cmp === '<=' ? a <= b : c.cmp === '>=' ? a >= b : c.cmp === '!=' ? Math.abs(a - b) >= 1e-9 : Math.abs(a - b) < 1e-9;
+  };
+  const fmt = (t, pl) => String(t).slice(0, 200).replace(/\{([@#]?)([\w-]{1,32})\}/g, (m, k, n) => {
+    const v = k === '@' ? (pl ? pl.sc[n] : 0) : k === '#' ? left(n, pl) : E.vars[n]; return String(Math.round((+v || 0) * 100) / 100);
+  });
+  const step = (a, pl) => {
+    if (a.move && typeof a.move === 'object') {
+      const p = h.parts.get(a.move.part), ax = 'xyz'.indexOf(a.move.axis); if (!p || ax < 0) return;
+      for (let k = h.movers.length; k--;) if (h.movers[k].p === p && h.movers[k].ax === ax) h.movers.splice(k, 1);
+      h.movers.push({ p, ax, from: p.pos[ax], to: ev(a.move.to, pl), sp: Math.abs(ev(a.move.speed, pl)) || 2, loop: !!a.move.loop });
+    } else if (a.hide !== undefined || a.show !== undefined) {
+      const p = h.parts.get(a.hide !== undefined ? a.hide : a.show); if (p) { p.hidden = a.hide !== undefined; h.dirty.add(p); }
+    } else if (a.kill) { if (pl) h.kill(pl); }
+    else if (Array.isArray(a.tp)) { if (pl) h.tp(pl, [0, 1, 2].map(k => ev(a.tp[k], pl))); }
+    else if (a.say !== undefined) h.say(pl, fmt(a.say, pl));
+    else if (a.set || a.change) {
+      const o = a.set || a.change, n = o && nm(o.name); if (!n) return;
+      const sc = o.scope === 'score';
+      for (const t of sc ? (pl ? [pl] : h.players()) : [null]) {
+        const cur = sc ? t.sc : E.vars, v = ev(a.set ? o.val : o.by, t || pl);
+        if (!(n in cur) && Object.keys(cur).length >= (sc ? 8 : 64)) continue;
+        cur[n] = a.set ? v : (+cur[n] || 0) + v;
+      }
+    } else if (a.timer || a.addtime) {
+      const o = a.timer || a.addtime, n = o && nm(o.name); if (!n) return;
+      const k = n + ':' + (pl ? pl.id : ''), secs = Math.max(0, ev(o.secs, pl)), t = E.timers.get(k);
+      if (a.addtime && t) t.left += secs; else if (E.timers.size < 64) E.timers.set(k, { name: n, left: secs, owner: pl || null });
+    } else if (a.stoptimer !== undefined) E.timers.delete(String(a.stoptimer) + ':' + (pl ? pl.id : ''));
+  };
+  // wykonuje listę akcji; „czekaj” zawiesza resztę listy; „jeśli” uruchamia zagnieżdżoną listę i wraca
+  E.exec = (acts, pl, done, i = 0, depth = 0) => {
+    if (!Array.isArray(acts) || depth > 16) return done && done();
+    while (i < acts.length) {
+      const a = acts[i++]; if (!a || typeof a !== 'object') continue;
+      if (a.wait !== undefined) {
+        const ms = Math.min(600, Math.max(0, ev(a.wait, pl))) * 1000;
+        setTimeout(() => { try { if (h.alive()) E.exec(acts, pl, done, i, depth); } catch (e) { } }, ms); return;
+      }
+      if (a.if) {
+        const list = test(a.if, pl) ? a.then : a.else;
+        if (Array.isArray(list) && list.length) { E.exec(list, pl, () => E.exec(acts, pl, done, i, depth), 0, depth + 1); return; }
+        continue;
+      }
+      step(a, pl);
+    }
+    done && done();
+  };
+  E.tick = (dt, rules) => { // timery odliczają w dół; zdarzenia „co N s” i „gdy timer się skończy”
+    for (const [k, t] of [...E.timers]) {
+      t.left -= dt; if (t.left > 0) continue; E.timers.delete(k);
+      const pl = t.owner && h.players().includes(t.owner) ? t.owner : null;
+      rules.forEach(u => { if (u.on === 'timerend' && u.name === t.name) E.exec(u.do, pl); });
+    }
+    rules.forEach((u, i) => {
+      if (u.on !== 'every') return;
+      const s = Math.max(0.1, +u.secs || 1); E.acc[i] = (E.acc[i] || 0) + dt;
+      if (E.acc[i] < s) return; E.acc[i] -= s;
+      if (u.each) h.players().forEach(c => E.exec(u.do, c)); else E.exec(u.do, null);
+    });
+  };
+  E.hud = pl => ({ timers: [...E.timers.values()].filter(t => !t.owner || t.owner === pl).map(t => [t.name, Math.max(0, t.left)]), me: pl.sc });
+  return E;
+}
+// ENGINE-END
+
+// ---------- podgląd: wbudowany, uproszczony klient + lokalna symulacja reguł ----------
+let R = null;
+function avatar() {
+  const g = new THREE.Group(), b = (w, h, d, y, c) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: c })); m.position.y = y; g.add(m); };
+  b(1, 1.2, 0.6, 0.6, 0x334); b(1.1, 1.3, 0.6, 1.85, 0x3366ff); b(0.8, 0.8, 0.8, 2.9, 0xffd9a0); scene.add(g); return g;
+}
+function pvStart() {
+  try { S.rules = JSON.parse($('rules').value || '[]'); } catch (e) { return note('Błąd JSON reguł: ' + e.message); }
+  selPart(null); tab('vp'); spawnM.visible = false;
+  const cur = R = { parts: new Map(), movers: [], dirty: new Set(), touch: new Set(), done: new Set(), P: [...(S.spawn || [0, 3, 0])], vy: 0, gr: false,
+    rules: S.rules.filter(u => u && typeof u === 'object'), me: avatar(), pl: { id: 1, sc: Object.create(null) } };
+  cur.E = Engine({ parts: cur.parts, movers: cur.movers, dirty: cur.dirty, players: () => [cur.pl], kill: () => pvRespawn(),
+    tp: (pl, p) => { cur.P = p; cur.vy = 0; }, say: (pl, t) => note('[gra] ' + t), alive: () => R === cur });
+  world.children.forEach(m => {
+    const p = m.userData.p; if (!p) return; const d = p.d;
+    cur.parts.set(d.id, { mesh: m, pos: [...d.pos], size: d.size, collide: d.collide !== false, anchored: d.anchored !== false, hidden: false, vel: 0 });
+  });
+  show('pv'); if (document.activeElement) document.activeElement.blur();
+  cur.rules.filter(u => u.on === 'start').forEach(u => cur.E.exec(u.do, null)); note('Podgląd: WASD, Spacja, PPM – kamera, Esc – stop');
+}
+function pvStop() { $('pvhud').hidden = true; scene.remove(R.me); R = null; build(S); sel = null; fill(); tree(); show('studio'); note('Podgląd zatrzymany'); }
+function pvRespawn() { R.P = [...(S.spawn || [0, 3, 0])]; R.vy = 0; }
+function pvHit(x, y, z) {
+  for (const p of R.parts.values()) {
+    if (!p.collide || p.hidden) continue;
+    const m = p.pos, s = p.size;
+    if (Math.abs(x - m[0]) < (s[0] + 1) / 2 && Math.abs(z - m[2]) < (s[2] + 1) / 2 && y + PH > m[1] - s[1] / 2 && y < m[1] + s[1] / 2 - 0.01) return p;
+  }
+  return null;
+}
+function pvFrame(dt) {
+  const r = R, P = r.P;
+  for (const m of [...r.movers]) {
+    const p = m.p, d = m.to - p.pos[m.ax], st = m.sp * dt;
+    if (Math.abs(d) <= st) { p.pos[m.ax] = m.to; if (m.loop) [m.to, m.from] = [m.from, m.to]; else r.movers.splice(r.movers.indexOf(m), 1); }
+    else p.pos[m.ax] += Math.sign(d) * st;
+  }
+  for (const p of r.parts.values()) {
+    if (p.anchored || p.hidden) continue;
+    const hh = p.size[1] / 2, bot = p.pos[1] - hh; let sup = S.ground ? 0 : -1e9;
+    for (const q of r.parts.values()) {
+      if (q === p || !q.collide || q.hidden) continue;
+      const t = q.pos[1] + q.size[1] / 2;
+      if (t <= bot + 0.05 && Math.abs(p.pos[0] - q.pos[0]) < (p.size[0] + q.size[0]) / 2 && Math.abs(p.pos[2] - q.pos[2]) < (p.size[2] + q.size[2]) / 2) sup = Math.max(sup, t);
+    }
+    p.vel -= 30 * dt; let nb = bot + p.vel * dt; if (nb <= sup) { nb = sup; p.vel = 0; }
+    p.pos[1] = nb + hh; if (p.pos[1] < -200) p.hidden = true;
+  }
+  const f = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0), s = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0); let dx = 0, dz = 0;
+  if (f || s) {
+    dx = -Math.sin(yaw) * f + Math.cos(yaw) * s; dz = -Math.cos(yaw) * f - Math.sin(yaw) * s;
+    const l = Math.hypot(dx, dz); dx = dx / l * 10 * dt; dz = dz / l * 10 * dt; r.me.rotation.y = Math.atan2(dx, dz);
+  }
+  if (!pvHit(P[0] + dx, P[1], P[2])) P[0] += dx;
+  if (!pvHit(P[0], P[1], P[2] + dz)) P[2] += dz;
+  if (keys.Space && r.gr) { r.vy = 13; r.gr = false; }
+  r.vy -= 35 * dt; const ny = P[1] + r.vy * dt, h = pvHit(P[0], ny, P[2]); r.gr = false;
+  if (h) { if (r.vy <= 0) { P[1] = h.pos[1] + h.size[1] / 2; r.gr = true; } else P[1] = h.pos[1] - h.size[1] / 2 - PH - 0.001; r.vy = 0; }
+  else P[1] = ny;
+  if (S.ground && P[1] < 0) { P[1] = 0; r.vy = 0; r.gr = true; }
+  if (P[1] < -60) pvRespawn();
+  r.rules.forEach((u, i) => {
+    const p = u.on === 'touch' && r.parts.get(u.part); if (!p || p.hidden) return;
+    const o = Math.abs(P[0] - p.pos[0]) < (p.size[0] + 1) / 2 + 0.1 && Math.abs(P[2] - p.pos[2]) < (p.size[2] + 1) / 2 + 0.1 &&
+      P[1] + PH > p.pos[1] - p.size[1] / 2 - 0.1 && P[1] < p.pos[1] + p.size[1] / 2 + 0.1;
+    if (o && !r.touch.has(i)) { r.touch.add(i); if (u.once && r.done.has(i)) return; r.done.add(i); r.E.exec(u.do, r.pl); }
+    else if (!o) r.touch.delete(i);
+  });
+  r.E.tick(dt, r.rules);
+  const hd = r.E.hud(r.pl), L = [...hd.timers.map(([n, l]) => '⏱ ' + n + ': ' + l.toFixed(1) + ' s'), ...Object.entries(hd.me).map(([n, v]) => n + ': ' + Math.round(v * 100) / 100)];
+  $('pvhud').textContent = L.join('\n'); $('pvhud').hidden = !L.length;
+  r.parts.forEach(p => { p.mesh.position.set(...p.pos); p.mesh.visible = !p.hidden; });
+  r.me.position.set(P[0], P[1], P[2]);
+  orbit(P[0], P[1] + 2.5, P[2], 9);
+}
+
+// ---------- narzędzia ----------
+function setTool(t) { tool = t; $('tmove').classList.toggle('on', t === 'move'); $('tscale').classList.toggle('on', t === 'scale'); note('Narzędzie: ' + (t === 'move' ? 'przesuwanie' : 'skalowanie (przeciągnij kostkę na ścianie)')); }
+$('tmove').onclick = () => setTool('move'); $('tscale').onclick = () => setTool('scale');
+
+// ---------- wizualny edytor reguł (bloki jak w Scratch) – edytuje S.rules, JSON zostaje zsynchronizowany ----------
+const HAT = new Set(['start', 'touch', 'every', 'timerend']);
+const I = (p, t, l) => ({ p, t, l });
+const BK = { // m: sposób zapisu parametrów w akcji JSON (obj = pod kluczem, val = wartość, tp = tablica x,y,z)
+  start: { c: 'ev', t: ['Gdy gra startuje'] },
+  touch: { c: 'ev', t: ['Gdy gracz dotknie', I('part', 'part'), I('once', 'chk', 'tylko raz')] },
+  every: { c: 'ev', t: ['Co', I('secs', 'num'), 's', I('each', 'chk', 'dla każdego gracza')] },
+  timerend: { c: 'ev', t: ['Gdy timer', I('name', 'nm'), 'się skończy'] },
+  move: { c: 'mv', key: 'move', m: 'obj', t: ['przesuń', I('part', 'part'), 'oś', I('axis', 'axis'), 'do', I('to', 'expr'), 'z prędkością', I('speed', 'expr'), I('loop', 'chk', 'tam i z powrotem')] },
+  hide: { c: 'lk', key: 'hide', m: 'val', t: ['ukryj', I('v', 'part')] },
+  show: { c: 'lk', key: 'show', m: 'val', t: ['pokaż', I('v', 'part')] },
+  kill: { c: 'pl', key: 'kill', m: 'val', t: ['zabij gracza (odrodzenie)'] },
+  tp: { c: 'pl', key: 'tp', m: 'tp', t: ['teleportuj do x', I('x', 'expr'), 'y', I('y', 'expr'), 'z', I('z', 'expr')] },
+  set: { c: 'vr', key: 'set', m: 'obj', t: ['ustaw', I('scope', 'scope'), I('name', 'nm'), 'na', I('val', 'expr')] },
+  change: { c: 'vr', key: 'change', m: 'obj', t: ['zmień', I('scope', 'scope'), I('name', 'nm'), 'o', I('by', 'expr')] },
+  if: { c: 'cn', key: 'if', m: 'obj', t: ['jeśli', I('a', 'expr'), I('cmp', 'cmp'), I('b', 'expr'), 'to'] },
+  wait: { c: 'tm', key: 'wait', m: 'val', t: ['czekaj', I('v', 'expr'), 's'] },
+  timer: { c: 'tm', key: 'timer', m: 'obj', t: ['uruchom timer', I('name', 'nm'), 'na', I('secs', 'expr'), 's'] },
+  addtime: { c: 'tm', key: 'addtime', m: 'obj', t: ['dodaj do timera', I('name', 'nm'), I('secs', 'expr'), 's'] },
+  stoptimer: { c: 'tm', key: 'stoptimer', m: 'val', t: ['zatrzymaj timer', I('v', 'nm')] },
+  say: { c: 'sy', key: 'say', m: 'val', t: ['powiedz', I('v', 'txt')] },
+  raw: { c: 'raw', t: [] }
+};
+const PAL = [['Zdarzenia', ['start', 'touch', 'every', 'timerend']], ['Ruch', ['move']], ['Wygląd', ['hide', 'show']], ['Gracz', ['kill', 'tp']],
+  ['Zmienne i wyniki', ['set', 'change']], ['Warunki', ['if']], ['Timery', ['wait', 'timer', 'addtime', 'stoptimer']], ['Komunikaty', ['say']]];
+const okk = (k, a) => { const d = BK[k]; return d.key && d.key in a && (d.m !== 'obj' || (a[d.key] && typeof a[d.key] === 'object')) && (d.m !== 'tp' || Array.isArray(a.tp)); };
+const kindOf = a => Object.keys(BK).find(k => okk(k, a)) || 'raw';
+const gp = (k, a, p) => { const d = BK[k]; return d.m === 'obj' ? a[d.key][p] : d.m === 'tp' ? a.tp['xyz'.indexOf(p)] : a[d.key]; };
+const sp = (k, a, p, v) => { const d = BK[k]; if (d.m === 'obj') { if (v === false) delete a[d.key][p]; else a[d.key][p] = v; } else if (d.m === 'tp') a.tp['xyz'.indexOf(p)] = v; else a[d.key] = v; };
+const firstPart = () => (sel && sel.d.id) || (S.parts[0] && S.parts[0].id) || '';
+const NEW = {
+  move: () => ({ move: { part: firstPart(), axis: 'y', to: 5, speed: 2 } }), hide: () => ({ hide: firstPart() }), show: () => ({ show: firstPart() }),
+  kill: () => ({ kill: true }), tp: () => ({ tp: [0, 3, 0] }), say: () => ({ say: 'Cześć!' }),
+  set: () => ({ set: { scope: 'var', name: 'licznik', val: 0 } }), change: () => ({ change: { scope: 'var', name: 'licznik', by: 1 } }),
+  if: () => ({ if: { cmp: '<', a: { var: 'licznik' }, b: 3 }, then: [], else: [] }),
+  wait: () => ({ wait: 1 }), timer: () => ({ timer: { name: 'czas', secs: 60 } }), addtime: () => ({ addtime: { name: 'czas', secs: 10 } }), stoptimer: () => ({ stoptimer: 'czas' })
+};
+const NEWR = { start: () => ({ on: 'start', do: [] }), touch: () => ({ on: 'touch', part: firstPart(), do: [] }), every: () => ({ on: 'every', secs: 5, do: [] }), timerend: () => ({ on: 'timerend', name: 'czas', do: [] }) };
+let di = null; // aktualnie przeciągany blok
+function fillNames() { // podpowiedzi nazw zmiennych / wyników / timerów
+  const set = new Set();
+  (function w(o) { if (Array.isArray(o)) o.forEach(w); else if (o && typeof o === 'object') for (const k in o) { if (['name', 'var', 'score', 'timer', 'stoptimer'].includes(k) && typeof o[k] === 'string' && o[k]) set.add(o[k]); w(o[k]); } })(S.rules);
+  $('names').innerHTML = ''; set.forEach(n => { const op = document.createElement('option'); op.value = n; $('names').appendChild(op); });
+}
+function commit() { $('rules').value = JSON.stringify(S.rules, null, 1); fillNames(); tree(); }
+function renameRefs(old, nw) {
+  (function w(x) { if (Array.isArray(x)) x.forEach(w); else if (x && typeof x === 'object') { if (x.part === old) x.part = nw; if (x.hide === old) x.hide = nw; if (x.show === old) x.show = nw; Object.values(x).forEach(w); } })(S.rules);
+  $('rules').value = JSON.stringify(S.rules, null, 1);
+}
+function exprCtl(get, set, d) { // wyrażenie: liczba | zmienna | wynik | timer | losowa od–do | (a ∘ b), zagnieżdżane
+  const w = document.createElement('span'); w.className = 'ex';
+  const kind = x => (x && typeof x === 'object') ? (x.var !== undefined ? 'var' : x.score !== undefined ? 'score' : x.timer !== undefined ? 'timer' : Array.isArray(x.rand) ? 'rand' : x.op ? 'op' : 'num') : 'num';
+  const mk = { num: () => 0, var: () => ({ var: 'licznik' }), score: () => ({ score: 'Punkty' }), timer: () => ({ timer: 'czas' }), rand: () => ({ rand: [1, 6] }), op: () => ({ op: '+', a: 1, b: 1 }) };
+  const lbl = { num: '#', var: 'zmienna', score: 'wynik', timer: 'timer', rand: 'losowa', op: 'a∘b' };
+  function draw() {
+    w.innerHTML = ''; const v = get(), k = kind(v), sel2 = document.createElement('select'); sel2.className = 'k';
+    Object.keys(lbl).filter(n => n !== 'op' || d < 3).forEach(n => sel2.add(new Option(lbl[n], n))); sel2.value = k;
+    sel2.onchange = () => { set(mk[sel2.value]()); commit(); draw(); }; w.appendChild(sel2);
+    if (k === 'num') { const i = document.createElement('input'); i.type = 'number'; i.step = 'any'; i.value = typeof v === 'number' ? v : 0; i.oninput = () => { set(+i.value || 0); commit(); }; w.appendChild(i); }
+    else if (k === 'rand') w.append('od', exprCtl(() => v.rand[0], x => { v.rand[0] = x; }, d + 1), 'do', exprCtl(() => v.rand[1], x => { v.rand[1] = x; }, d + 1));
+    else if (k === 'op') {
+      const o = document.createElement('select'); [['+', '+'], ['-', '−'], ['*', '×'], ['/', '÷'], ['%', 'mod']].forEach(([a, b]) => o.add(new Option(b, a))); o.value = v.op; o.onchange = () => { v.op = o.value; commit(); };
+      w.append('(', exprCtl(() => v.a, x => { v.a = x; }, d + 1), o, exprCtl(() => v.b, x => { v.b = x; }, d + 1), ')');
+    } else { const i = document.createElement('input'); i.type = 'text'; i.setAttribute('list', 'names'); i.value = v[k] ?? ''; i.oninput = () => { set({ [k]: i.value }); commit(); }; w.appendChild(i); }
+  }
+  draw(); return w;
+}
+function ctl(x, get, set) {
+  if (x.t === 'chk') {
+    const l = document.createElement('label'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = !!get();
+    c.onchange = () => { set(c.checked); commit(); }; l.append(c, ' ' + x.l); return l;
+  }
+  if (x.t === 'expr') return exprCtl(get, set, 0);
+  let el;
+  if (['part', 'axis', 'cmp', 'scope'].includes(x.t)) {
+    el = document.createElement('select'); const cur = get();
+    const opts = x.t === 'axis' ? [['x', 'x'], ['y', 'y'], ['z', 'z']] : x.t === 'cmp' ? [['<', '<'], ['>', '>'], ['=', '='], ['<=', '≤'], ['>=', '≥'], ['!=', '≠']]
+      : x.t === 'scope' ? [['var', 'zmienną'], ['score', 'wynik gracza']] : S.parts.map(p => [p.id, p.id]);
+    if (x.t === 'part' && cur && !opts.some(o => o[0] === cur)) opts.push([cur, cur]);
+    opts.forEach(([v, l]) => el.add(new Option(l, v))); el.value = cur || (x.t === 'axis' ? 'y' : x.t === 'cmp' ? '=' : x.t === 'scope' ? 'var' : '');
+  } else {
+    el = document.createElement('input'); el.type = x.t === 'num' ? 'number' : 'text'; if (x.t === 'num') el.step = 'any'; if (x.t === 'nm') el.setAttribute('list', 'names'); el.value = get() ?? '';
+  }
+  el.oninput = el.onchange = () => { set(x.t === 'num' ? (+el.value || 0) : el.value); commit(); };
+  return el;
+}
+function blk(k, g, s, del, txt) {
+  const d = BK[k], b = document.createElement('div'), grip = document.createElement('span');
+  b.className = 'b ' + d.c; grip.className = 'grip'; grip.textContent = '⠿'; b.appendChild(grip);
+  d.t.forEach(x => { if (typeof x === 'string') { const sp2 = document.createElement('span'); sp2.textContent = x; b.appendChild(sp2); } else b.appendChild(ctl(x, () => g(x.p), v => s(x.p, v))); });
+  if (txt) { const c = document.createElement('code'); c.textContent = txt; b.appendChild(c); }
+  if (del) { const x = document.createElement('span'); x.className = 'x'; x.textContent = '✕'; x.onclick = del; b.appendChild(x); }
+  return { b, grip };
+}
+const inside = (a, arr) => [a.then, a.else].some(l => Array.isArray(l) && (l === arr || l.some(x => inside(x, arr))));
+function doDrop(arr, idx) { // arr – tablica akcji (lista skryptu albo „to”/„inaczej” bloku jeśli)
+  if (!di || di.hat) return; let a;
+  if (di.src === 'pal') a = NEW[di.kind]();
+  else { if (inside(di.a, arr)) return; a = di.arr.splice(di.ai, 1)[0]; if (di.arr === arr && di.ai < idx) idx--; }
+  arr.splice(idx, 0, a); di = null; commit(); renderBlocks();
+}
+function mkSlot(arr) {
+  const sl = document.createElement('div'); sl.className = 'slot';
+  sl.ondragover = e => { if (!di || di.hat) return; e.preventDefault(); e.stopPropagation(); sl.classList.add('on'); };
+  sl.ondragleave = () => sl.classList.remove('on');
+  sl.ondrop = e => { if (!di || di.hat) return; e.preventDefault(); e.stopPropagation(); sl.classList.remove('on'); doDrop(arr, arr.length); };
+  return sl;
+}
+function renderList(parent, arr) {
+  arr.forEach((a, ai) => {
+    if (!a || typeof a !== 'object') return;
+    const k = kindOf(a); if (k === 'move') a.move.axis = a.move.axis || 'y'; if (k === 'if') a.if.cmp = a.if.cmp || '=';
+    const wrap = document.createElement('div');
+    const { b, grip } = blk(k, p => gp(k, a, p), (p, v) => sp(k, a, p, v), () => { arr.splice(ai, 1); commit(); renderBlocks(); }, k === 'raw' ? JSON.stringify(a).slice(0, 60) : '');
+    grip.draggable = true;
+    grip.ondragstart = e => { di = { src: 'ws', arr, ai, a }; e.dataTransfer.setData('text/plain', 'b'); e.dataTransfer.setDragImage(b, 8, 8); };
+    grip.ondragend = () => { di = null; };
+    const before = e => e.clientY < b.getBoundingClientRect().top + b.offsetHeight / 2;
+    b.ondragover = e => { if (!di || di.hat) return; e.preventDefault(); e.stopPropagation(); const f = before(e); b.classList.toggle('dt', f); b.classList.toggle('db', !f); };
+    b.ondragleave = () => b.classList.remove('dt', 'db');
+    b.ondrop = e => { if (!di || di.hat) return; e.preventDefault(); e.stopPropagation(); const f = before(e); b.classList.remove('dt', 'db'); doDrop(arr, ai + (f ? 0 : 1)); };
+    wrap.appendChild(b);
+    if (k === 'if') [['to', 'then'], ['inaczej', 'else']].forEach(([label, key]) => {
+      if (!Array.isArray(a[key])) a[key] = [];
+      const lb = document.createElement('div'), box = document.createElement('div'); lb.className = 'clabel'; lb.textContent = label; box.className = 'cbox';
+      renderList(box, a[key]); box.appendChild(mkSlot(a[key])); wrap.append(lb, box);
+    });
+    parent.appendChild(wrap);
+  });
+}
+function renderBlocks() {
+  const ws = $('ws'); ws.innerHTML = ''; fillNames();
+  S.rules.forEach((r, ri) => {
+    if (!r || typeof r !== 'object') return; if (!Array.isArray(r.do)) r.do = [];
+    const sc = document.createElement('div'); sc.className = 'script'; const hk = HAT.has(r.on) ? r.on : 'raw';
+    const hat = blk(hk, p => r[p], (p, v) => { if (v === false) delete r[p]; else r[p] = v; }, () => { S.rules.splice(ri, 1); commit(); renderBlocks(); }, hk === 'raw' ? JSON.stringify({ on: r.on }) : '').b;
+    hat.classList.add('hat');
+    hat.ondragover = e => { if (!di || di.hat) return; e.preventDefault(); e.stopPropagation(); hat.classList.add('db'); };
+    hat.ondragleave = () => hat.classList.remove('db');
+    hat.ondrop = e => { if (!di || di.hat) return; e.preventDefault(); e.stopPropagation(); hat.classList.remove('db'); doDrop(r.do, 0); };
+    sc.appendChild(hat); renderList(sc, r.do); sc.appendChild(mkSlot(r.do)); ws.appendChild(sc);
+  });
+  if (!S.rules.length) ws.innerHTML = '<div style="color:#777;padding:20px">Przeciągnij (lub kliknij) blok „Gdy …” z palety po lewej, aby zacząć skrypt.</div>';
+}
+(function buildPal() {
+  const pal = $('pal'), lab = x => typeof x === 'string' ? x : ({ part: '[część]', axis: '[oś]', num: '#', txt: '“…”', nm: '[nazwa]', expr: '(wartość)', cmp: '[<]', scope: '[zmienna/wynik]', chk: '☐ ' + x.l })[x.t];
+  PAL.forEach(([cat, ks]) => {
+    const h = document.createElement('div'); h.className = 'cat'; h.textContent = cat; pal.appendChild(h);
+    ks.forEach(k => {
+      const b = document.createElement('div'); b.className = 'b ' + BK[k].c + (HAT.has(k) ? ' hat' : ''); b.textContent = BK[k].t.map(lab).join(' '); b.draggable = true;
+      b.ondragstart = e => { di = { src: 'pal', kind: k, hat: HAT.has(k) }; e.dataTransfer.setData('text/plain', 'b'); };
+      b.ondragend = () => { di = null; };
+      b.onclick = () => {
+        if (HAT.has(k)) S.rules.push(NEWR[k]()); else if (S.rules.length) S.rules[S.rules.length - 1].do.push(NEW[k]()); else return note('Najpierw dodaj blok „Gdy …”');
+        commit(); renderBlocks();
+      };
+      pal.appendChild(b);
+    });
+  });
+  pal.ondragover = e => { if (di && di.src === 'ws') e.preventDefault(); };
+  pal.ondrop = e => { if (di && di.src === 'ws') { e.preventDefault(); di.arr.splice(di.ai, 1); di = null; commit(); renderBlocks(); } };
+  $('ws').ondragover = e => { if (di && di.hat) e.preventDefault(); };
+  $('ws').ondrop = e => { if (di && di.hat) { e.preventDefault(); S.rules.push(NEWR[di.kind]()); di = null; commit(); renderBlocks(); } };
+})();
+
+// ---------- pliki i serwer ----------
+function syncRules() { try { S.rules = JSON.parse($('rules').value || '[]'); return true; } catch (e) { note('Błąd JSON reguł: ' + e.message); tab('js'); return false; } }
+$('snew').onclick = () => { stLoad(stBlank()); $('sn').value = 'moja_gra'; tree(); note('Nowa gra'); };
+$('sopenb').onclick = () => $('sopen').click();
+$('ssave').onclick = () => {
+  if (!syncRules()) return;
+  const _assets = {}; S.parts.forEach(p => local.has(p.tex) && (_assets[p.tex] = local.get(p.tex)));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ ...S, _assets })], { type: 'application/json' }));
+  a.download = ($('sn').value.trim() || 'gra') + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); note('Zapisano plik projektu');
+};
+$('sopen').onchange = e => {
+  const f = e.target.files[0]; if (!f) return; const r = new FileReader();
+  r.onload = () => {
+    try {
+      const { _assets, ...g } = JSON.parse(r.result);
+      Object.entries(_assets || {}).forEach(([n, d]) => FILE.test(n) && local.set(n, d));
+      stLoad(g); $('sn').value = f.name.replace(/\.json$/i, '').replace(/[^\w-]/g, '_').slice(0, 32); tree(); note('Otwarto ' + f.name);
+    } catch { note('Niepoprawny plik gry'); }
+  };
+  r.readAsText(f); e.target.value = '';
+};
+$('upl').onclick = () => $('sfile').click();
+$('sfile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return; if (f.size > 1e6) return note('Tekstura: maks. 1 MB');
+  const n = f.name.replace(/[^\w.-]/g, '_'); if (!FILE.test(n)) return note('Nazwa pliku: litery/cyfry/_-, rozszerzenie png/jpg/gif/webp');
+  const r = new FileReader(); r.onload = () => { local.set(n, r.result); assets.add(n); fillAssets(); note('Dodano teksturę ' + n + ' (trafi na serwer przy publikacji)'); };
+  r.readAsDataURL(f); e.target.value = '';
+};
+$('slist').onclick = () => conn(() => send({ t: 'list' }));
+$('sload').onclick = () => { if (!$('sl').value) return note('Najpierw pobierz listę gier'); lastGet = $('sl').value; conn(() => send({ t: 'get', name: lastGet })); };
+$('spub').onclick = () => {
+  if (!syncRules()) return;
+  const name = $('sn').value.trim(); if (!/^[\w-]{1,32}$/.test(name)) return note('Nazwa gry: litery, cyfry, _ i -, max 32 znaki');
+  conn(() => {
+    new Set(S.parts.map(p => p.tex).filter(t => local.has(t))).forEach(t => send({ t: 'asset', name: t, data: local.get(t), key }));
+    send({ t: 'publish', name, game: S, key });
+  });
+};
+$('sadd').onclick = () => addPart(TPL['Blok']()); $('sdup').onclick = dup; $('sdel').onclick = del;
+$('sspawn').onclick = () => { S.spawn = [T.x, T.y + 2, T.z].map(v => Math.round(v * 2) / 2); spawnM.position.set(...S.spawn); note('Spawn: ' + S.spawn.join(', ')); };
+$('sgr').onchange = e => { S.ground = e.target.checked ? '#4caf50' : undefined; build(S); sel = null; fill(); tree(); };
+$('grid').onchange = e => grid = +e.target.value;
+$('sn').oninput = tree;
+$('spv').onclick = () => mode === 'pv' ? pvStop() : pvStart();
+
+// ---------- wejście: PPM – kamera, LPM – zaznaczanie/przesuwanie ----------
+vp.addEventListener('contextmenu', e => { if (e.target === ren.domElement) e.preventDefault(); });
+vp.addEventListener('mousedown', e => {
+  if (e.target !== ren.domElement) return;
+  if (e.button === 2 || mode === 'pv') { drag = true; return; }
+  if (e.button === 0 && mode === 'studio' && !dragStart(e)) selPart(null);
+});
+addEventListener('mousemove', e => {
+  if (dg) return dragMove(e);
+  if (drag) { yaw -= e.movementX * 0.005; pitch = Math.max(0.05, Math.min(1.5, pitch + e.movementY * 0.005)); }
+});
+addEventListener('mouseup', () => { dg = null; drag = false; });
+addEventListener('wheel', e => { if (mode === 'studio' && e.target === ren.domElement) dist = Math.max(4, Math.min(200, dist * (1 + e.deltaY * 0.001))); });
+addEventListener('keydown', e => {
+  const inp = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+  if (mode === 'pv') { if (e.key === 'Escape') return pvStop(); if (e.code === 'Space' && !inp) e.preventDefault(); }
+  if (inp) return;
+  if (mode === 'studio') {
+    if (e.key === 'Delete') return del();
+    if (e.key === '1') return setTool('move'); if (e.key === '2') return setTool('scale');
+    if (e.ctrlKey && e.code === 'KeyD') { e.preventDefault(); return dup(); }
+    if (e.code === 'KeyF' && sel) T.copy(sel.mesh.position);
+  }
+  keys[e.code] = true;
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+
+stLoad(stDefault()); $('sn').value = 'starter_place'; T.set(-49, 10, 76); dist = 75; tree();
+note('Blokowo Studio gotowe. Pracujesz offline – serwer jest potrzebny tylko do publikowania.');
+note('LPM – zaznacz/przesuń część · PPM + przeciągnięcie – obrót kamery · kółko – zoom · WASD/QE – ruch · F – skup · Del – usuń · Ctrl+D – duplikuj · 1/2 – narzędzie przesuń/skaluj');
+
+let last = performance.now();
+(function frame(t) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, (t - last) / 1000); last = t; gz.visible = false; sg.visible = false;
+  if (mode === 'studio') studioCam(dt); else if (mode === 'pv' && R) pvFrame(dt);
+  ren.render(scene, cam);
+})(last);
+</script></body></html>
