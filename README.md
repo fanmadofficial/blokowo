@@ -1,6 +1,5 @@
 blokowo to jest prosty klon robloxa zrobiony przez jednego polaka i claude'a, ma klient, ma studio, i ma serwer, więc jesli jesteście zainteresowani pomóżcie mi rozwijać ten projekt
 
-
 jak zacząć?
 
 1. pobierz repozytorium, otwórz terminal, wejdź do repozytorium w terminalu.
